@@ -15,23 +15,40 @@ As edições são montadas no **montador** (`montador.html`), que publica sozinh
 | `assets/img/` | Capa, marca Unimed Uberlândia 55 anos, marca do Grupo e registro ANS. |
 | `imagens/` | Fotos enviadas pelo montador. A pasta é criada sozinha na primeira publicação. |
 | `.nojekyll` | Faz o GitHub Pages servir os arquivos como estão. |
+| `.github/workflows/publicar.yml` | Automação: descompacta .zip enviados, apaga o .zip e publica o site. |
 
 ## Endereços
 
-Troque `USUARIO` e `REPOSITORIO` pelos do seu repositório.
+Repositório: [`informativoudi/boletiminterno`](https://github.com/informativoudi/boletiminterno)
 
 | Uso | Endereço |
 | --- | --- |
-| Boletim (edição atual) | `https://USUARIO.github.io/REPOSITORIO/` |
-| Espelho (validação) | `https://USUARIO.github.io/REPOSITORIO/?espelho=true` |
-| Uma edição específica | `https://USUARIO.github.io/REPOSITORIO/?edicao=ID` |
-| Montador | `https://USUARIO.github.io/REPOSITORIO/montador.html` |
+| Boletim (edição atual) | `https://informativoudi.github.io/boletiminterno/` |
+| Espelho (validação) | `https://informativoudi.github.io/boletiminterno/?espelho=true` |
+| Uma edição específica | `https://informativoudi.github.io/boletiminterno/?edicao=ID` |
+| Montador | `https://informativoudi.github.io/boletiminterno/montador.html` |
 
 ## Como colocar no ar
 
-1. Crie o repositório no GitHub e suba **todo o conteúdo desta pasta na raiz** (não a pasta em si).
-2. Em **Settings → Pages → Source**, escolha *Deploy from a branch*, branch `main` e pasta `/ (root)`. Salve.
-3. Em cerca de um minuto, o boletim abre no endereço do Pages.
+1. Crie o repositório no GitHub.
+2. Na primeira vez, suba os arquivos **descompactados**, com o conteúdo desta pasta na raiz do repositório (não a pasta em si). Confira se a pasta `.github` foi junto: ela fica oculta no Windows e no Mac.
+   - Se ela não for, crie o arquivo pelo site: **Add file → Create new file**, nome `.github/workflows/publicar.yml`, e cole o conteúdo do arquivo de mesmo nome.
+3. Em **Settings → Pages → Build and deployment → Source**, escolha **GitHub Actions**.
+4. Na aba **Actions**, a automação "Publicar boletim" roda e, em cerca de um minuto, o site abre no endereço do Pages.
+
+## Atualizar enviando só o .zip
+
+Depois da primeira vez, para trocar arquivos do site (layout, montador, capa, marcas):
+
+1. Compacte os arquivos novos num `.zip`. Pode ser a pasta inteira (`boletim-interno.zip`) ou só os arquivos que mudaram.
+2. No repositório, clique em **Add file → Upload files**, arraste o `.zip` e clique em **Commit changes**.
+3. A automação descompacta tudo na raiz, **apaga o .zip** e publica o site. Acompanhe na aba **Actions**.
+
+Regras da automação:
+- Se o zip tiver uma única pasta por fora, ela usa o conteúdo dessa pasta.
+- O `dados.json` e a pasta `imagens/` que já estão no repositório **não são substituídos**. Assim as edições publicadas pelo montador ficam a salvo. Para trocar o `dados.json` de propósito, apague o atual antes de enviar o zip.
+- A pasta `.github` de dentro do zip é ignorada. Para mudar a automação, edite o arquivo direto no GitHub.
+- Arquivos que não estão no zip continuam no repositório. Para remover algo, apague pelo GitHub.
 
 ## Conectar o montador ao GitHub
 
@@ -39,7 +56,7 @@ Troque `USUARIO` e `REPOSITORIO` pelos do seu repositório.
    - *Repository access*: só este repositório;
    - *Permissions → Contents*: **Read and write**.
 2. Abra o montador (`/montador.html`) e clique em **GitHub** no topo.
-3. Preencha usuário ou organização, repositório, branch `main` e o token. Clique em **Testar conexão** e depois em **Salvar**.
+3. Usuário (`informativoudi`), repositório (`boletiminterno`) e branch (`main`) já vêm preenchidos. Cole o token, clique em **Testar conexão** e depois em **Salvar**.
 
 O token fica guardado só no navegador de quem configurou. Cada pessoa da equipe configura o seu.
 
@@ -59,7 +76,7 @@ O embed ajusta a altura sozinho, e o menu do boletim rola a página do Framer at
 3. **Enviar para o espelho** e valide em `?espelho=true`.
 4. **Publicar no boletim**: a edição vira a atual e a anterior vai para o menu **Edições**.
 
-O site atualiza cerca de um minuto depois de cada envio.
+O site atualiza cerca de um minuto depois de cada envio (a automação roda sozinha a cada envio do montador).
 
 ## Seções disponíveis no montador
 

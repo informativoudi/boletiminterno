@@ -5,6 +5,7 @@
   'use strict';
   var B = window.Boletim;
   var GH_KEY = 'boletim-montador-github';
+  var REPO_PADRAO = { owner: 'informativoudi', repo: 'boletiminterno', branch: 'main', pasta: '' };
   var ENVIADAS_KEY = 'boletim-montador-imagens';
   var MAX_MIDIAS = 10, MAX_PESSOAS = 12;
 
@@ -775,7 +776,7 @@
   function atualizarGhBotao() { $('#gh-dot').classList.toggle('ok', ghPronto()); $('#btn-gh').title = ghPronto() ? 'Conectado a ' + S.gh.owner + '/' + S.gh.repo : 'GitHub não configurado'; }
   function modalGithub() {
     var g = S.gh;
-    modal('<h3>Publicar direto no GitHub</h3><p>O montador envia o <b>dados.json</b> (e as imagens enviadas) para o repositório do boletim. O GitHub Pages atualiza o site sozinho.</p>' +
+    modal('<h3>Publicar direto no GitHub</h3><p>O montador envia o <b>dados.json</b> (e as imagens enviadas) para o repositório <b>informativoudi/boletiminterno</b>. O site atualiza sozinho. Só falta colar o token.</p>' +
       '<div class="linha"><div class="campo"><label for="g1">Usuário ou organização</label><input type="text" id="g1" value="' + esc(g.owner || '') + '" placeholder="ex.: informativoudi"></div><div class="campo"><label for="g2">Repositório</label><input type="text" id="g2" value="' + esc(g.repo || '') + '" placeholder="ex.: boletim-comunicacao-interna"></div></div>' +
       '<div class="linha"><div class="campo"><label for="g3">Branch</label><input type="text" id="g3" value="' + esc(g.branch || 'main') + '"></div><div class="campo"><label for="g4">Pasta no repositório</label><input type="text" id="g4" value="' + esc(g.pasta || '') + '" placeholder="vazio = raiz"></div></div>' +
       '<div class="campo"><label for="g5">Token de acesso</label><input type="password" id="g5" value="' + esc(g.token || '') + '" placeholder="github_pat_…" autocomplete="off"><div class="dica">Fica guardado só neste navegador. Use um <b>fine-grained token</b> só deste repositório, com permissão <i>Contents: Read and write</i>.</div></div>' +
@@ -856,7 +857,11 @@
 
   // ---------- Início ----------
   function iniciar() {
-    try { S.gh = JSON.parse(localStorage.getItem(GH_KEY)) || {}; } catch (e) { S.gh = {}; }
+    var salvo = {};
+    try { salvo = JSON.parse(localStorage.getItem(GH_KEY)) || {}; } catch (e) { salvo = {}; }
+    S.gh = Object.assign({}, REPO_PADRAO, salvo);
+    if (!S.gh.owner) S.gh.owner = REPO_PADRAO.owner;
+    if (!S.gh.repo) S.gh.repo = REPO_PADRAO.repo;
     ligarEditor();
     var vazio = function () { S.dados = { v: 1, legados: [], edicoes: [] }; };
     abrirDB().then(lerLocal).then(function (d) {
