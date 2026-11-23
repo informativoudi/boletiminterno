@@ -85,20 +85,39 @@
     botao: function () { return { texto: 'Saiba mais', url: '', cor: 'verde' }; },
     card: function () { return { icone: '📌', titulo: '', texto: '', cor: 'azul', link: '', linkTexto: 'Saiba mais' }; },
     faixa: function () { return ''; },
-    categoria: function () { return { nome: 'Nova categoria', icone: 'estrela' }; },
+    categoria: function () { return { nome: 'Nova categoria', icone: 'estrela', itens: [] }; },
     caixa: function () { return { marca: '', texto: '', link: '', linkTexto: 'Leia mais' }; },
     pessoa: function () { return { nome: '', cargo: '', foto: '' }; },
     legado: function () { return { rotulo: '', url: '' }; },
-    itemGestao: function (cat) { return { id: uid(), categoria: cat || '', titulo: '', disposicao: 'esquerda', midias: [], texto: '', botoes: [], destaque: null }; }
+    itemGestao: function () { return { id: uid(), titulo: '', disposicao: 'esquerda', midias: [], texto: '', botoes: [], destaque: null }; }
   };
 
   var BLOCOS = {
     noticia: { nome: 'Notícia', desc: 'Nome da seção, título, foto ou vídeo, texto, botões e destaque.', novo: function () { return { id: uid(), tipo: 'noticia', menu: 'acontece', secao: 'Acontece na Unimed Uberlândia', titulo: '', disposicao: 'esquerda', midias: [], texto: '', botoes: [], destaque: null }; } },
-    gestao: { nome: 'Gente e Gestão', desc: 'Notícias separadas por categoria, com menu próprio.', novo: function () { return { id: uid(), tipo: 'gestao', menu: 'gestao', secao: 'Gente e Gestão', categorias: [{ nome: 'Trilhas Técnicas', icone: 'quadro' }, { nome: 'Ser Líder', icone: 'grafico' }, { nome: 'Novidades', icone: 'camadas' }, { nome: 'Cultura', icone: 'cultura' }], itens: [MODELOS.itemGestao('Trilhas Técnicas')] }; } },
+    gestao: { nome: 'Gente e Gestão', desc: 'Notícias separadas por categoria, com menu próprio.', novo: function () { return { id: uid(), tipo: 'gestao', menu: 'gestao', secao: 'Gente e Gestão', categorias: [{ nome: 'Trilhas Técnicas', icone: 'quadro', itens: [MODELOS.itemGestao()] }, { nome: 'Ser Líder', icone: 'grafico', itens: [] }, { nome: 'Novidades', icone: 'camadas', itens: [] }, { nome: 'Cultura', icone: 'cultura', itens: [] }] }; } },
     caixas: { nome: 'Caixas com destaque', desc: 'Retângulos com uma marca no início e o texto ao lado (ex.: Giro ESG).', novo: function () { return { id: uid(), tipo: 'caixas', menu: '', secao: 'Giro ESG', cor: 'verde', itens: [{ marca: 'E', texto: '', link: '', linkTexto: 'Leia mais' }, { marca: 'S', texto: '', link: '', linkTexto: 'Leia mais' }, { marca: 'G', texto: '', link: '', linkTexto: 'Leia mais' }] }; } },
     novos: { nome: 'Gente nova', desc: 'Cabeçalho com título e mês, fotos com nome e cargo (até 12).', novo: function () { return { id: uid(), tipo: 'pessoas', variante: 'novos', menu: 'gentenova', cor: 'verde', titulo: 'A equipe está crescendo', subtitulo: 'Tem gente nova na casa!', mes: mesExtenso(), mostrarLogo: false, pessoas: [] }; } },
     lideres: { nome: 'Novos líderes', desc: 'Mesma estrutura, outra cor e a marca do Grupo.', novo: function () { return { id: uid(), tipo: 'pessoas', variante: 'lideres', menu: 'gentenova', cor: 'petroleo', titulo: 'Novos líderes na casa', subtitulo: 'Boas-vindas à liderança!', mes: mesExtenso(), mostrarLogo: true, pessoas: [] }; } }
   };
+
+  // Formato antigo: notícias soltas em b.itens com o nome da categoria. Agora cada categoria guarda as suas.
+  function normalizarGestao(b) {
+    if (!b || b.tipo !== 'gestao') return b;
+    b.categorias = (b.categorias || []).map(function (k) { if (!Array.isArray(k.itens)) k.itens = []; return k; });
+    if (Array.isArray(b.itens)) {
+      if (!b.categorias.length) b.categorias.push({ nome: 'Geral', icone: 'quadro', itens: [] });
+      b.itens.forEach(function (it) {
+        var k = b.categorias.filter(function (c) { return c.nome === it.categoria; })[0] || b.categorias[0];
+        delete it.categoria; k.itens.push(it);
+      });
+      delete b.itens;
+    }
+    return b;
+  }
+  function normalizarDados(d) {
+    (d && d.edicoes || []).forEach(function (e) { (e.blocos || []).forEach(normalizarGestao); });
+    return d;
+  }
 
   function mesExtenso(mes) {
     var m = /^(\d{4})-(\d{2})$/.exec(mes || (edAtual() && edAtual().mes) || hojeMes());
@@ -247,7 +266,7 @@
 
   function resumoBloco(b) {
     if (b.tipo === 'pessoas') return (b.titulo || '') + ' · ' + (b.pessoas || []).length + ' pessoa(s)';
-    if (b.tipo === 'gestao') return (b.itens || []).length + ' notícia(s) em ' + (b.categorias || []).length + ' categorias';
+    if (b.tipo === 'gestao') { normalizarGestao(b); return (b.categorias || []).reduce(function (n, k) { return n + (k.itens || []).length; }, 0) + ' notícia(s) em ' + (b.categorias || []).length + ' categorias'; }
     if (b.tipo === 'caixas') return (b.itens || []).length + ' caixa(s)';
     return b.titulo || 'Sem título';
   }
@@ -270,22 +289,30 @@
     if (b.tipo === 'noticia') c += edConteudo(p, b);
 
     if (b.tipo === 'gestao') {
+      normalizarGestao(b);
       var cats = b.categorias || [];
-      c += campo('Categorias do menu', '<div class="lista-itens">' + cats.map(function (k, j) {
-        var opIc = Object.keys(NOMES_ICONES).map(function (x) { return [x, NOMES_ICONES[x]]; });
-        return '<div class="item"><div class="flex"><span style="color:#004e4c;display:flex">' + B.icone(k.icone, 18) + '</span>' + inp(p + '.categorias.' + j + '.nome', k.nome, 'Nome da categoria', 'text', ' data-cat-antigo="' + esc(k.nome) + '"') +
-          '<div style="width:140px;flex-shrink:0">' + sel(p + '.categorias.' + j + '.icone', k.icone, opIc, true) + '</div>' + botoesItem(p + '.categorias', j, cats.length) + '</div></div>';
-      }).join('') + '</div><button type="button" class="add" data-a="add" data-p="' + p + '.categorias" data-m="categoria">+ Categoria</button>',
-        'Renomear uma categoria leva junto as notícias dela.');
-      var opCat = cats.map(function (k) { return [k.nome, k.nome]; });
-      c += '<div class="titulo-sec" style="margin-top:22px">Notícias</div>';
-      c += (b.itens || []).map(function (it, j) {
-        var pi = p + '.itens.' + j;
-        return '<div class="item" style="border:1px solid #e4e0d8;border-radius:14px;padding:14px;margin-top:10px;background:#fcfbf9"><div class="item-cab"><b>' + esc(it.titulo || 'Notícia ' + (j + 1)) + '</b>' +
-          botoesItem(p + '.itens', j, b.itens.length, '<button type="button" class="ib" data-a="dup" data-p="' + p + '.itens" data-i="' + j + '" aria-label="Duplicar">' + ic.dup + '</button>') + '</div>' +
-          campo('Categoria', sel(pi + '.categoria', it.categoria, opCat, true)) + edConteudo(pi, it) + '</div>';
+      var opIc = Object.keys(NOMES_ICONES).map(function (x) { return [x, NOMES_ICONES[x]]; });
+      c += '<div class="titulo-sec" style="margin-top:22px">Categorias e notícias</div>';
+      c += cats.map(function (k, j) {
+        var pc = p + '.categorias.' + j;
+        var itens = k.itens || [];
+        var h = '<div class="cat-bloco">' +
+          '<div class="cat-cab"><span class="cat-ic">' + B.icone(k.icone, 18) + '</span>' +
+          inp(pc + '.nome', k.nome, 'Nome da categoria', 'text', ' aria-label="Nome da categoria" style="font-weight:700;color:#004e4c"') +
+          '<div style="width:140px;flex-shrink:0">' + sel(pc + '.icone', k.icone, opIc, true).replace('<select', '<select aria-label="Ícone"') + '</div>' +
+          botoesItem(p + '.categorias', j, cats.length) + '</div>' +
+          '<div class="dica" style="margin:2px 0 4px">' + itens.length + ' notícia(s) nesta categoria</div>';
+        h += itens.map(function (it, n) {
+          var pi = pc + '.itens.' + n;
+          return '<div class="cat-item"><div class="item-cab"><b>' + esc(it.titulo || 'Notícia ' + (n + 1)) + '</b>' +
+            botoesItem(pc + '.itens', n, itens.length, '<button type="button" class="ib" data-a="dup" data-p="' + pc + '.itens" data-i="' + n + '" aria-label="Duplicar">' + ic.dup + '</button>') + '</div>' +
+            edConteudo(pi, it) + '</div>';
+        }).join('');
+        h += '<button type="button" class="add" data-a="add" data-p="' + pc + '.itens" data-m="itemGestao">+ Notícia em ' + esc(k.nome || 'esta categoria') + '</button></div>';
+        return h;
       }).join('');
-      c += '<button type="button" class="add" data-a="add-gestao" data-p="' + p + '.itens">+ Notícia de Gente e Gestão</button>';
+      c += '<button type="button" class="add" data-a="add" data-p="' + p + '.categorias" data-m="categoria" style="margin-top:14px">+ Nova categoria</button>';
+      c += '<div class="dica">Cada categoria vira uma aba no boletim, com as notícias dela logo abaixo.</div>';
     }
 
     if (b.tipo === 'caixas') {
@@ -421,15 +448,6 @@
       if (t.dataset.rich) { mudar(t.dataset.rich, t.innerHTML); return; }
       if (!t.dataset.p) return;
       var v = t.type === 'checkbox' ? t.checked : t.value;
-      // Renomear categoria: leva as notícias junto.
-      if (t.dataset.catAntigo != null) {
-        var m = /^blocos\.(\d+)\.categorias\.\d+\.nome$/.exec(t.dataset.p);
-        if (m) {
-          var bl = edAtual().blocos[m[1]];
-          (bl.itens || []).forEach(function (it) { if (it.categoria === t.dataset.catAntigo) it.categoria = v; });
-          t.dataset.catAntigo = v;
-        }
-      }
       mudar(t.dataset.p, v);
       if (t.hasAttribute('data-sum')) {
         var bm = /^(blocos\.\d+)\./.exec(t.dataset.p);
@@ -581,11 +599,10 @@
         if (btn.dataset.m === 'midia' && l.length >= MAX_MIDIAS) return;
         if (btn.dataset.m === 'pessoa' && l.length >= MAX_PESSOAS) return;
         l.push(MODELOS[btn.dataset.m]()); break;
-      case 'add-gestao':
-        l = pegar(e, p); var bl = pegar(e, p.replace(/\.itens$/, ''));
-        l.push(MODELOS.itemGestao(((bl.categorias || [])[0] || {}).nome || '')); break;
+
       case 'del':
         l = pegar(e, p);
+        if (/\.categorias$/.test(p) && (l[i].itens || []).length) { var kk = l[i]; confirmar('Excluir categoria?', 'A categoria “' + esc(kk.nome) + '” e as ' + kk.itens.length + ' notícia(s) dela saem desta edição.', 'Excluir', function () { l.splice(i, 1); salvar(); renderEditor(); previa(true); }); return; }
         if (p === 'blocos') { var nome = nomeTipo(l[i]); confirmar('Excluir seção?', 'A seção “' + esc(l[i].secao || nome) + '” sai desta edição.', 'Excluir', function () { l.splice(i, 1); salvar(); renderEditor(); previa(true); }); return; }
         l.splice(i, 1); break;
       case 'mov':
@@ -701,6 +718,7 @@
       (e.blocos || []).forEach(function (b) {
         lr(b, 'texto'); lr(b.destaque, 'texto');
         (b.itens || []).forEach(function (it) { lr(it, 'texto'); lr(it.destaque, 'texto'); });
+        (b.categorias || []).forEach(function (k) { (k.itens || []).forEach(function (it) { lr(it, 'texto'); lr(it.destaque, 'texto'); }); });
       });
     });
   }
@@ -778,7 +796,8 @@
       if (r.ok) toast((msgOk || 'Enviado.') + ' O site atualiza em cerca de um minuto.', 5000);
       else if (r.status === 401) toast('Token inválido ou expirado. Abra o GitHub no topo e troque o token.', 6000);
       else if (r.status === 404) toast('Repositório não encontrado. Confira o nome e as permissões do token.', 6000);
-      else toast('O GitHub recusou o envio (erro ' + r.status + ').', 6000);
+      else if (r.status === 403) toast('O token não tem permissão de escrita. No GitHub, edite o token e deixe Contents em Read and write.', 8000);
+      else toast('O GitHub recusou o envio (erro ' + r.status + (r.corpo && r.corpo.message ? ': ' + r.corpo.message : '') + ').', 7000);
     }).catch(function (err) {
       publicando = false;
       toast('Não consegui falar com o GitHub' + (/img/.test(err && err.message) ? ' ao enviar uma imagem' : '') + '. Tente de novo ou use Mais › Baixar dados.json.', 6500);
@@ -792,7 +811,7 @@
         var rascunhos = (S.dados ? S.dados.edicoes : []).filter(function (e) { return e.status === 'rascunho'; });
         var ids = rem.edicoes.map(function (e) { return e.id; });
         rem.edicoes = rem.edicoes.concat(rascunhos.filter(function (r) { return ids.indexOf(r.id) < 0; }));
-        S.dados = rem; if (!S.dados.legados) S.dados.legados = [];
+        S.dados = normalizarDados(rem); if (!S.dados.legados) S.dados.legados = [];
         S.selId = (rem.edicoes.filter(function (e) { return e.status === 'online'; })[0] || rem.edicoes[0] || {}).id || null;
         salvar(); renderTudo();
         if (!silencioso) toast('Versão publicada carregada. Seus rascunhos foram mantidos.');
@@ -823,7 +842,7 @@
         if (!ghPronto()) { st.textContent = 'Preencha usuário, repositório e token.'; return; }
         st.textContent = 'Testando…';
         gh('GET', '').then(function (r) {
-          if (r.ok) st.textContent = r.corpo.permissions && r.corpo.permissions.push ? '✓ Conectado a ' + r.corpo.full_name + ' com permissão de escrita.' : 'Conectado, mas o token não tem permissão de escrita.';
+          if (r.ok) st.textContent = r.corpo.permissions && r.corpo.permissions.push ? '✓ Conectado a ' + r.corpo.full_name + '. Confira no GitHub se o token tem Contents: Read and write (o teste só confirma a leitura).' : 'Conectado, mas sua conta não tem permissão de escrita neste repositório.';
           else st.textContent = r.status === 401 ? 'Token inválido ou expirado.' : r.status === 404 ? 'Repositório não encontrado — confira o nome e as permissões do token.' : 'Erro ' + r.status + '.';
         }).catch(function () { st.textContent = 'Não consegui falar com o GitHub a partir desta página.'; });
       });
@@ -963,7 +982,7 @@
             if (sha) corpo.sha = sha;
             return gh('PUT', '/contents/' + caminho('acesso.json'), corpo);
           }).then(function (r) {
-            if (!r.ok) { st.textContent = 'Erro ' + r.status + ' ao salvar.'; return; }
+            if (!r.ok) { st.innerHTML = r.status === 403 ? '<span style="color:#c2410c"><b>O token não tem permissão de escrita neste repositório.</b> No GitHub, edite o token e deixe <b>Contents</b> em <b>Read and write</b>. Depois clique em Salvar equipe de novo.</span>' : 'Erro ' + r.status + ' ao salvar' + (r.corpo && r.corpo.message ? ': ' + esc(r.corpo.message) : '') + '.'; return; }
             sha = r.corpo.content && r.corpo.content.sha; alterado = false;
             st.textContent = '✓ Equipe salva. Em cerca de um minuto, quem estiver na lista já consegue entrar.';
           }).catch(function () { st.textContent = 'Não consegui falar com o GitHub.'; });
@@ -1025,7 +1044,7 @@
       var d = JSON.parse(t);
       if (!d || !Array.isArray(d.edicoes)) throw new Error('formato');
       confirmar('Restaurar backup?', 'As edições deste navegador serão trocadas pelas do arquivo (' + d.edicoes.length + ' edições).', 'Restaurar', function () {
-        S.dados = d; if (!d.legados) d.legados = []; S.selId = (d.edicoes[0] || {}).id || null; salvar(); renderTudo(); toast('Backup restaurado.');
+        S.dados = normalizarDados(d); if (!d.legados) d.legados = []; S.selId = (d.edicoes[0] || {}).id || null; salvar(); renderTudo(); toast('Backup restaurado.');
       });
     }).catch(function () { toast('Esse arquivo não é um backup do montador.'); });
   });
@@ -1045,7 +1064,7 @@
     var vazio = function () { S.dados = { v: 1, legados: [], edicoes: [] }; };
     abrirDB().then(lerLocal).then(function (d) {
       if (d && Array.isArray(d.edicoes)) {
-        S.dados = d; if (!d.legados) d.legados = [];
+        S.dados = normalizarDados(d); if (!d.legados) d.legados = [];
         var on = d.edicoes.filter(function (e) { return e.status !== 'arquivada'; }).sort(function (a, b) { return String(b.mes).localeCompare(String(a.mes)); })[0];
         S.selId = (on || d.edicoes[0] || {}).id || null;
         renderTudo(); return;

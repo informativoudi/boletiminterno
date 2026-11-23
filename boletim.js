@@ -182,16 +182,26 @@
   function blocoGestao(b, opts, idx) {
     var cats = (b.categorias || []).filter(function (c) { return c && c.nome; });
     if (!cats.length) cats = [{ nome: 'Geral', icone: 'quadro' }];
+    var itensDe = function (c) { return Array.isArray(c.itens) ? c.itens : (b.itens || []).filter(function (it) { return (it.categoria || cats[0].nome) === c.nome; }); };
     var abas = cats.map(function (c, i) {
-      return '<button type="button" role="tab" class="bl-aba" id="aba-' + idx + '-' + i + '" aria-controls="painel-' + idx + '-' + i + '" aria-selected="' + (i ? 'false' : 'true') + '" tabindex="' + (i ? '-1' : '0') + '">' + icone(c.icone) + esc(c.nome) + '</button>';
+      var n = itensDe(c).length;
+      return '<button type="button" role="tab" class="bl-aba" id="aba-' + idx + '-' + i + '" aria-controls="painel-' + idx + '-' + i + '" aria-selected="' + (i ? 'false' : 'true') + '" tabindex="' + (i ? '-1' : '0') + '">' + icone(c.icone) + '<span>' + esc(c.nome) + '</span>' +
+        (n ? '<b class="bl-aba-n" aria-label="' + n + ' notícia' + (n > 1 ? 's' : '') + '">' + n + '</b>' : '') + '</button>';
     }).join('');
+    var seta = function (lado) {
+      return '<button type="button" class="bl-abas-seta bl-abas-seta--' + lado + '" data-lado="' + (lado === 'esq' ? -1 : 1) + '" aria-label="' + (lado === 'esq' ? 'Categorias anteriores' : 'Mais categorias') + '" tabindex="-1">' +
+        '<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="' + (lado === 'esq' ? 'm15 6-6 6 6 6' : 'm9 6 6 6-6 6') + '"/></svg></button>';
+    };
     var paineis = cats.map(function (c, i) {
-      var itens = (b.itens || []).filter(function (it) { return (it.categoria || cats[0].nome) === c.nome; });
+      var itens = itensDe(c);
       var conteudo = itens.length ? itens.map(function (it) { return '<div class="bl-gestao-item">' + htmlNoticia(it, opts, c.nome) + '</div>'; }).join('')
         : '<div class="bl-gestao-vazio">Em breve, novidades de ' + esc(c.nome) + '.</div>';
-      return '<div role="tabpanel" class="bl-painel" id="painel-' + idx + '-' + i + '" aria-labelledby="aba-' + idx + '-' + i + '"' + (i ? ' hidden' : '') + '>' + conteudo + '</div>';
+      var outras = cats.length > 1 ? '<div class="bl-outras"><span>Outras categorias</span>' + cats.map(function (o, j) {
+        return j === i ? '' : '<button type="button" class="bl-outra" data-ir-aba="aba-' + idx + '-' + j + '">' + icone(o.icone, 14) + esc(o.nome) + '</button>';
+      }).join('') + '</div>' : '';
+      return '<div role="tabpanel" class="bl-painel" id="painel-' + idx + '-' + i + '" aria-labelledby="aba-' + idx + '-' + i + '"' + (i ? ' hidden' : '') + '>' + conteudo + outras + '</div>';
     }).join('');
-    return nomeSecao(b) + '<div class="bl-abas" role="tablist" aria-label="' + esc(b.secao || 'Categorias') + '">' + abas + '</div>' + paineis;
+    return nomeSecao(b) + '<div class="bl-abas-wrap">' + seta('esq') + '<div class="bl-abas" role="tablist" aria-label="' + esc(b.secao || 'Categorias') + '">' + abas + '</div>' + seta('dir') + '</div>' + paineis;
   }
 
   function blocoCaixas(b) {
@@ -449,7 +459,36 @@
 
   function iniciarAbas(lista) {
     var abas = Array.prototype.slice.call(lista.querySelectorAll('[role="tab"]'));
-    var escolhe = function (aba, foco) {
+    var secao = lista.closest('.bl-secao') || lista;
+    var rolarAteAbas = function () {
+      var topoMenu = (document.querySelector('.bl-menu') || { offsetHeight: 0 }).offsetHeight;
+      var y = secao.getBoundingClientRect().top + window.scrollY - topoMenu - 8;
+      if (window.parent !== window) window.parent.postMessage({ tipo: 'boletim:rolar', y: Math.max(0, y) }, '*');
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    };
+    var wrap = lista.closest('.bl-abas-wrap');
+    var bordas = function () {
+      if (!wrap) return;
+      var max = lista.scrollWidth - lista.clientWidth;
+      wrap.classList.toggle('tem-esq', lista.scrollLeft > 8);
+      wrap.classList.toggle('tem-dir', lista.scrollLeft < max - 8);
+    };
+    if (wrap) {
+      wrap.querySelectorAll('.bl-abas-seta').forEach(function (b) {
+        b.addEventListener('click', function () { lista.scrollBy({ left: parseInt(b.dataset.lado, 10) * lista.clientWidth * 0.7, behavior: 'smooth' }); });
+      });
+      lista.addEventListener('scroll', function () { requestAnimationFrame(bordas); }, { passive: true });
+      window.addEventListener('resize', bordas);
+      setTimeout(bordas, 60);
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(bordas);
+    }
+    var mostraAba = function (aba) {
+      var l = aba.offsetLeft - 64, r = aba.offsetLeft + aba.offsetWidth + 64;
+      if (l < lista.scrollLeft) lista.scrollTo({ left: l, behavior: 'smooth' });
+      else if (r > lista.scrollLeft + lista.clientWidth) lista.scrollTo({ left: r - lista.clientWidth, behavior: 'smooth' });
+    };
+    var escolhe = function (aba, foco, rolar) {
+      mostraAba(aba);
       abas.forEach(function (a) {
         var sel = a === aba;
         a.setAttribute('aria-selected', sel ? 'true' : 'false');
@@ -457,7 +496,8 @@
         var p = document.getElementById(a.getAttribute('aria-controls'));
         if (p) p.hidden = !sel;
       });
-      if (foco) aba.focus();
+      if (foco) aba.focus({ preventScroll: true });
+      if (rolar || lista.getBoundingClientRect().top < 0) rolarAteAbas();
       avisarAltura();
     };
     abas.forEach(function (a, i) {
@@ -465,6 +505,12 @@
       a.addEventListener('keydown', function (e) {
         if (e.key === 'ArrowRight') escolhe(abas[(i + 1) % abas.length], true);
         if (e.key === 'ArrowLeft') escolhe(abas[(i - 1 + abas.length) % abas.length], true);
+      });
+    });
+    secao.querySelectorAll('[data-ir-aba]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var alvo = document.getElementById(b.dataset.irAba);
+        if (alvo) escolhe(alvo, true, true);
       });
     });
   }
