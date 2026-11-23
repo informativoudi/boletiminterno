@@ -1,6 +1,6 @@
 {
  "v": 1,
- "atualizado": "2026-11-23T14:30:00-03:00",
+ "atualizado": "2026-11-23T18:51:17.620Z",
  "legados": [
   {
    "rotulo": "Edição de 03/09/26",
@@ -17,118 +17,65 @@
  ],
  "edicoes": [
   {
-   "id": "ed-2026-10",
-   "mes": "2026-10",
-   "rotulo": "outubro/26",
+   "id": "ed-xy4auhjv",
+   "mes": "2026-11",
+   "rotulo": "Janeiro/27",
    "status": "online",
    "faixa": [
-    "Eu ajudo na lata: última pesagem neste mês de novembro",
-    "Consciência Negra: Mãos que Cuidam, Corpos que Merecem Cuidado",
-    "Semana de prevenção à fraude e à lavagem de dinheiro: participe das nossas ações"
+    " Novembro Azul",
+    "Consciência Negra",
+    "Semana de Prevenção à Fraude e da campanha",
+    "Eu ajudo na lata"
    ],
    "informes": {
     "titulo": "Informes Gerais: comece por aqui!",
     "subtitulo": "Confira os destaques, participe das iniciativas e aproveite as oportunidades preparadas para você.",
     "cards": [
      {
-      "icone": "📧",
-      "titulo": "Atualização do e-mail",
-      "cor": "azul",
-      "texto": "<p>Colaborador, cadastre seu e-mail pessoal no Wellhub, no plano de saúde, no plano odontológico e em outros serviços não ligados ao trabalho. Assim, você não perde avisos nem acessos importantes. <strong>Atualize hoje mesmo!</strong></p>",
-      "link": "",
-      "linkTexto": ""
-     },
-     {
-      "icone": "🧠",
-      "titulo": "Quiz do Boletim",
-      "cor": "amarelo",
-      "texto": "<p>Leia as novidades abaixo para responder ao Quiz. Assim, você concorre a pares de ingressos para o Praia Clube e muito mais!</p>",
-      "link": "https://forms.office.com/",
-      "linkTexto": "Participe!"
-     },
-     {
-      "icone": "💙",
+      "icone": "📌",
       "titulo": "Novembro Azul",
-      "cor": "verde",
-      "texto": "<p>Mês de conscientização sobre o câncer de próstata e a importância do diagnóstico precoce.</p>",
+      "texto": "<p>ashdkljahsdljkahlsdjahlsdjahsldjaksdhlajksdalksjdaçlks<br>ashdkljahsdljkahlsdjahlsdjahsldjaksdhlajksdalksjdaçlks<br>ashdkljahsdljkahlsdjahlsdjahsldjaksdhlajksdalksjdaçlks</p>",
+      "cor": "azul",
       "link": "",
-      "linkTexto": "Confira os benefícios"
+      "linkTexto": "Saiba mais"
      },
      {
-      "icone": "✅",
-      "titulo": "Semana da Qualidade",
-      "cor": "rosa",
-      "texto": "<p>Vem aí uma programação especial. Fique de olho e garanta sua participação.</p>",
-      "link": "",
-      "linkTexto": "Inscreva-se"
+      "icone": "📌",
+      "titulo": "Teste",
+      "texto": "<p>akjsdlajklsdjajnczkjkjkaskjdças</p>",
+      "cor": "verde",
+      "link": "https://g1.globo.com/mg/triangulo-mineiro/mg1-uberlandia/video/descarte-correto-de-canetas-emagrecedoras-evita-acidentes-e-riscos-a-saude-15273636.ghtml",
+      "linkTexto": "Saiba mais"
      }
     ]
    },
    "blocos": [
     {
-     "id": "b1",
+     "id": "xqmedhpl",
      "tipo": "noticia",
      "menu": "acontece",
      "secao": "Acontece na Unimed Uberlândia",
-     "titulo": "Pausa para o Café",
+     "titulo": "",
      "disposicao": "esquerda",
      "midias": [],
-     "texto": "<p>O encontro mensal acontece na última sexta-feira do mês. Nesta edição, o foco foram os <strong>Serviços Próprios</strong> e as <strong>Linhas de Cuidado</strong>, com a participação de Munique Morais, coordenadora da Medicina Preventiva, e Caroline Almeida, psicóloga.</p>",
-     "botoes": [
-      {
-       "texto": "Assistir à gravação",
-       "url": "https://www.yammer.com/",
-       "cor": "verde"
-      },
-      {
-       "texto": "Painel no SharePoint",
-       "url": "https://sharepoint.com/",
-       "cor": "contorno"
-      }
-     ],
+     "texto": "",
+     "botoes": [],
      "destaque": null
     },
     {
-     "id": "b2",
-     "tipo": "noticia",
-     "menu": "acontece",
-     "secao": "Acontece na Unimed Uberlândia",
-     "titulo": "Se está nos seus planos, coloque na agenda!",
-     "disposicao": "direita",
-     "midias": [],
-     "texto": "<p>Em novembro tem campanha de doação de sangue, com brinde para quem doar e apresentar o comprovante.</p><p><strong>Local:</strong> Hemominas, Av. Levino de Souza, 1845, Umuarama.</p>",
-     "botoes": [],
-     "destaque": {
-      "texto": "<p><strong>Como participar:</strong> agende sua doação pelo site do governo e, depois, chame Gustavo Vilela Ribeiro no Teams para retirar o brinde. <mark class=\"r-lima\">Doe vida!</mark></p>",
-      "cor": "lima"
-     }
-    },
-    {
-     "id": "b3",
+     "id": "xktfpuhh",
      "tipo": "noticia",
      "menu": "eventos",
      "secao": "Eventos e Ações",
-     "titulo": "4ª Meia Maratona Unimed Uberlândia",
+     "titulo": "",
      "disposicao": "esquerda",
      "midias": [],
-     "texto": "<p>A corrida reuniu atletas, colaboradores e cooperados em uma manhã de muita energia. Destaque para o pódio da categoria exclusiva de colaboradores.</p><p><mark class=\"r-verde\">Corre que vira Hábito.</mark></p>",
+     "texto": "",
      "botoes": [],
      "destaque": null
     },
     {
-     "id": "b4",
-     "tipo": "noticia",
-     "menu": "eventos",
-     "secao": "Eventos e Ações",
-     "titulo": "Ação Dia da Criança Feliz | Instituto Unimed Uberlândia",
-     "disposicao": "direita",
-     "midias": [],
-     "texto": "<p>A ação beneficiou <strong>2.747 crianças e adolescentes</strong> de 10 instituições. Foram arrecadadas 550 caixas de bombons, com a participação de 311 colaboradores, 240 cooperados e 36 líderes.</p>",
-     "botoes": [],
-     "destaque": null
-    },
-    {
-     "id": "b5",
+     "id": "xoyxfxw3",
      "tipo": "gestao",
      "menu": "gestao",
      "secao": "Gente e Gestão",
@@ -152,19 +99,19 @@
      ],
      "itens": [
       {
-       "id": "g1",
+       "id": "xqbzyvi4",
        "categoria": "Trilhas Técnicas",
-       "titulo": "Jornada de Trilhas Técnicas no Assistencial",
+       "titulo": "",
        "disposicao": "esquerda",
        "midias": [],
-       "texto": "<p>A Jornada de Trilhas Técnicas no Assistencial começou nos dias 29 e 30 de setembro, com oito turmas conduzidas por Patrícia Lisboa, palestrante parceira da OCEMG. Os encontros trouxeram uma conversa sobre comunicação entre equipes multiprofissionais e inteligência relacional no cuidado.</p><p>Ao todo, <strong>103 colaboradores</strong> participaram da iniciativa.</p>",
+       "texto": "",
        "botoes": [],
        "destaque": null
       }
      ]
     },
     {
-     "id": "b6",
+     "id": "xta2ee9i",
      "tipo": "caixas",
      "menu": "",
      "secao": "Giro ESG",
@@ -172,99 +119,35 @@
      "itens": [
       {
        "marca": "E",
-       "texto": "<p>Economia circular ganha espaço nas empresas. A <strong>Tramontina</strong> oferece até 20% de desconto na troca de utensílios antigos, incentivando o reaproveitamento de materiais.</p>",
+       "texto": "",
        "link": "",
-       "linkTexto": ""
+       "linkTexto": "Leia mais"
       },
       {
        "marca": "S",
-       "texto": "<p>Longevidade entra na agenda das empresas. Com a população vivendo mais, o tema passa a influenciar o futuro dos negócios, e especialistas discutem como as organizações podem se preparar.</p>",
+       "texto": "",
        "link": "",
-       "linkTexto": ""
+       "linkTexto": "Leia mais"
       },
       {
        "marca": "G",
-       "texto": "<p>Gestão de riscos vira prioridade para os Comitês de Auditoria. O levantamento da <strong>Deloitte</strong>, divulgado pelo <strong>IBGC</strong>, mostra o tema no centro da governança corporativa.</p>",
+       "texto": "",
        "link": "",
-       "linkTexto": ""
+       "linkTexto": "Leia mais"
       }
      ]
     },
     {
-     "id": "b7",
+     "id": "x5n28yo1",
      "tipo": "pessoas",
      "variante": "novos",
      "menu": "gentenova",
      "cor": "verde",
      "titulo": "A equipe está crescendo",
      "subtitulo": "Tem gente nova na casa!",
-     "mes": "Outubro",
+     "mes": "Novembro",
      "mostrarLogo": false,
-     "pessoas": [
-      {
-       "nome": "Adriane Moura Ramos de Brito",
-       "cargo": "Enfermeiro(a) Auditor(a) Pl.",
-       "foto": ""
-      },
-      {
-       "nome": "Ana Laura Cunha Alves Brigato",
-       "cargo": "Enfermeiro(a) Auditor(a) Jr.",
-       "foto": ""
-      },
-      {
-       "nome": "Ellen Cristyne Teodoro F Silva",
-       "cargo": "Farmacêutico(a)",
-       "foto": ""
-      },
-      {
-       "nome": "Henrique Cunha Vieira",
-       "cargo": "Analista Gestão de Risco Pl.",
-       "foto": ""
-      },
-      {
-       "nome": "Layner Souza da Cruz",
-       "cargo": "Advogado(a) Pl.",
-       "foto": ""
-      },
-      {
-       "nome": "Lothar Matthaeus Andrade e Bueno",
-       "cargo": "Analista de Dados Jr.",
-       "foto": ""
-      },
-      {
-       "nome": "Matheus Henrique Lopes Soares Bispo",
-       "cargo": "Auditor Pl.",
-       "foto": ""
-      },
-      {
-       "nome": "Nathalya Aparecida Silva",
-       "cargo": "Consultor(a) de Vendas",
-       "foto": ""
-      },
-      {
-       "nome": "Taynara Monteiro Prestes",
-       "cargo": "Psicólogo(a)",
-       "foto": ""
-      }
-     ]
-    },
-    {
-     "id": "b8",
-     "tipo": "pessoas",
-     "variante": "lideres",
-     "menu": "gentenova",
-     "cor": "petroleo",
-     "titulo": "Novos líderes na casa",
-     "subtitulo": "Boas-vindas à liderança!",
-     "mes": "Setembro",
-     "mostrarLogo": true,
-     "pessoas": [
-      {
-       "nome": "Pedro Henrique Soares de Gouveia",
-       "cargo": "Coordenador(a) Contabilidade",
-       "foto": ""
-      }
-     ]
+     "pessoas": []
     }
    ],
    "rodape": {
