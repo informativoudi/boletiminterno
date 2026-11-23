@@ -247,7 +247,9 @@
   }
 
   function htmlMenu(ed, presentes) {
-    return '<nav class="bl-menu" aria-label="Seções do boletim"><div class="bl-menu-in">' + MENU.filter(function (m) {
+    return '<nav class="bl-menu" aria-label="Seções do boletim"><div class="bl-menu-topo"><span class="bl-menu-marca">Comunicação Interna</span>' +
+      '<button type="button" class="bl-burger" aria-expanded="false" aria-controls="bl-menu-itens" aria-label="Abrir menu"><span></span><span></span><span></span></button></div>' +
+      '<div class="bl-menu-in" id="bl-menu-itens">' + MENU.filter(function (m) {
       return m.id === 'inicio' || m.id === 'edicoes' || presentes[m.id];
     }).map(function (m) {
       if (m.id === 'edicoes') return '<div class="bl-edicoes"><button type="button" class="bl-pill bl-pill--edicoes" aria-expanded="false" aria-haspopup="true" data-edicoes>' + m.rotulo + '</button></div>';
@@ -341,6 +343,19 @@
       };
       if (img.complete) marca(); else img.addEventListener('load', marca);
     });
+    var burger = raiz.querySelector('.bl-burger');
+    var nav = raiz.querySelector('.bl-menu');
+    var fecharMenu = function () { nav.classList.remove('aberto'); burger.setAttribute('aria-expanded', 'false'); burger.setAttribute('aria-label', 'Abrir menu'); avisarAltura(); };
+    if (burger) {
+      burger.addEventListener('click', function () {
+        var ab = !nav.classList.contains('aberto');
+        nav.classList.toggle('aberto', ab);
+        burger.setAttribute('aria-expanded', ab ? 'true' : 'false');
+        burger.setAttribute('aria-label', ab ? 'Fechar menu' : 'Abrir menu');
+        avisarAltura();
+      });
+      raiz.querySelectorAll('.bl-menu a').forEach(function (a) { a.addEventListener('click', fecharMenu); });
+    }
     // Dentro do embed (iframe com altura total) quem rola é a página do Framer.
     raiz.querySelectorAll('.bl-menu a[href^="#"]').forEach(function (a) {
       a.addEventListener('click', function (e) {
