@@ -1,6 +1,6 @@
 {
  "v": 1,
- "atualizado": "2026-11-23T18:51:17.620Z",
+ "atualizado": "2026-11-23T19:34:17.266Z",
  "legados": [
   {
    "rotulo": "Edição de 03/09/26",
@@ -17,65 +17,79 @@
  ],
  "edicoes": [
   {
-   "id": "ed-xy4auhjv",
-   "mes": "2026-11",
-   "rotulo": "Janeiro/27",
+   "id": "ed-x5ovapew",
+   "mes": "2027-01",
+   "rotulo": "janeiro/27",
    "status": "online",
    "faixa": [
-    " Novembro Azul",
-    "Consciência Negra",
-    "Semana de Prevenção à Fraude e da campanha",
-    "Eu ajudo na lata"
+    "EU AJUDO NA LATA",
+    "CONFIRA O RESULTADO DA CAMPANHA DEZEMBRO VERMELHO",
+    "INFORMAÇÃO TAMBÉM É CUIDADO",
+    "CONFRATERNIZAÇÃO DE FIM DE ANO: VEM AÍ!"
    ],
    "informes": {
     "titulo": "Informes Gerais: comece por aqui!",
     "subtitulo": "Confira os destaques, participe das iniciativas e aproveite as oportunidades preparadas para você.",
     "cards": [
      {
-      "icone": "📌",
-      "titulo": "Novembro Azul",
-      "texto": "<p>ashdkljahsdljkahlsdjahlsdjahsldjaksdhlajksdalksjdaçlks<br>ashdkljahsdljkahlsdjahlsdjahsldjaksdhlajksdalksjdaçlks<br>ashdkljahsdljkahlsdjahlsdjahsldjaksdhlajksdalksjdaçlks</p>",
+      "icone": "🧠",
+      "titulo": " Quiz do Boletim:",
+      "texto": "<p>Leia as novidades abaixo para responder ao Quiz. <mark class=\"r-amarelo\">Assim, você concorre a prêmio e muito mais!</mark></p>",
       "cor": "azul",
+      "link": "www.participe.com.br",
+      "linkTexto": "Participe!"
+     },
+     {
+      "icone": "❤️",
+      "titulo": " Dezembro Vermelho:",
+      "texto": "<p>Dezembro é o mês de conscientização sobre a <mark class=\"r-laranja\">prevenção ao HIV/Aids e outras ISTs. </mark>Informação, prevenção e diagnóstico precoce salvam vidas. Fique ligado nas ações que preparamos!</p>",
+      "cor": "verde",
       "link": "",
       "linkTexto": "Saiba mais"
      },
      {
-      "icone": "📌",
-      "titulo": "Teste",
-      "texto": "<p>akjsdlajklsdjajnczkjkjkaskjdças</p>",
-      "cor": "verde",
-      "link": "https://g1.globo.com/mg/triangulo-mineiro/mg1-uberlandia/video/descarte-correto-de-canetas-emagrecedoras-evita-acidentes-e-riscos-a-saude-15273636.ghtml",
+      "icone": "🎄",
+      "titulo": " Confraternização de fim de ano:",
+      "texto": "<p>Nossa confraternização já tem data: [dia/mês], às [horário], em [local]. Fique de olho nos canais oficiais para mais detalhes e confirme sua presença!<br></p>",
+      "cor": "areia",
+      "link": "www.evento.com.br",
       "linkTexto": "Saiba mais"
      }
     ]
    },
    "blocos": [
     {
-     "id": "xqmedhpl",
+     "id": "xcvxyap9",
      "tipo": "noticia",
      "menu": "acontece",
-     "secao": "Acontece na Unimed Uberlândia",
-     "titulo": "",
-     "disposicao": "esquerda",
+     "secao": "PAUSA PARA O CAFÉ",
+     "titulo": "O nosso Pausa para o Café já é compromisso de todos os colaboradores na última sexta do mês.",
+     "disposicao": "texto",
      "midias": [],
-     "texto": "",
+     "texto": "<p>Não conseguiu acompanhar esse momento ao vivo? Clique aqui para conferir a gravação e fique ligado nas próximas comunicações no Viva Engage, onde todos os cortes e informações serão divulgados!</p><p>Lembre-se: todos os últimos encontros do Pausa para o Café estão disponíveis no Painel de Novidades Gente e Gestão no SharePoint do RH. Clique aqui para acessar!</p><p><b><mark class=\"r-verde\">Nos vemos no próximo!</mark></b><br></p>",
      "botoes": [],
      "destaque": null
     },
     {
-     "id": "xktfpuhh",
+     "id": "xf8dcddp",
      "tipo": "noticia",
      "menu": "eventos",
-     "secao": "Eventos e Ações",
-     "titulo": "",
-     "disposicao": "esquerda",
-     "midias": [],
-     "texto": "",
+     "secao": "ACONTECE NA UNIMED UBERLÂNDIA",
+     "titulo": "A última pesagem da campanha Eu Ajudo na Lata aconteceu em novembro, e o resultado é motivo de orgulho",
+     "disposicao": "direita",
+     "midias": [
+      {
+       "url": "imagens/ca28037d985de439.jpg",
+       "legenda": "",
+       "tipo": "imagem"
+      }
+     ],
+     "texto": "<p>A última pesagem da campanha Eu Ajudo na Lata aconteceu em novembro, e o resultado é motivo de orgulho</p><p>Obrigado a cada colaborador e área que separou, juntou e entregou seus lacres. Pequenos gestos, quando somados, transformam realidades. 💚</p><p>[Destaque para as áreas que mais arrecadaram, se houver.]<br></p>",
      "botoes": [],
      "destaque": null
     },
     {
-     "id": "xoyxfxw3",
+     "id": "xb2r77jq",
      "tipo": "gestao",
      "menu": "gestao",
      "secao": "Gente e Gestão",
@@ -99,8 +113,8 @@
      ],
      "itens": [
       {
-       "id": "xqbzyvi4",
-       "categoria": "Trilhas Técnicas",
+       "id": "xm7jaray",
+       "categoria": "Nova categoria",
        "titulo": "",
        "disposicao": "esquerda",
        "midias": [],
@@ -111,43 +125,17 @@
      ]
     },
     {
-     "id": "xta2ee9i",
-     "tipo": "caixas",
-     "menu": "",
-     "secao": "Giro ESG",
-     "cor": "verde",
-     "itens": [
-      {
-       "marca": "E",
-       "texto": "",
-       "link": "",
-       "linkTexto": "Leia mais"
-      },
-      {
-       "marca": "S",
-       "texto": "",
-       "link": "",
-       "linkTexto": "Leia mais"
-      },
-      {
-       "marca": "G",
-       "texto": "",
-       "link": "",
-       "linkTexto": "Leia mais"
-      }
-     ]
-    },
-    {
-     "id": "x5n28yo1",
+     "id": "x1i8fyxe",
      "tipo": "pessoas",
      "variante": "novos",
-     "menu": "gentenova",
-     "cor": "verde",
+     "menu": "gestao",
+     "cor": "petroleo",
      "titulo": "A equipe está crescendo",
      "subtitulo": "Tem gente nova na casa!",
-     "mes": "Novembro",
+     "mes": "Janeiro",
      "mostrarLogo": false,
-     "pessoas": []
+     "pessoas": [],
+     "secao": "Teste"
     }
    ],
    "rodape": {
