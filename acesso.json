@@ -1,0 +1,25 @@
+{
+ "v": 1,
+ "usuarios": [
+  {
+   "nome": "Camila",
+   "chave": {
+    "iv": "zeemwEPIFOD+V9rb",
+    "ct": "JozKgzzh6NHpVSl3jb5YVFZbgzX12A21iJW5h9+QEB2lDXAnhJaq1ZrabtVaYHTGyLGP8ZGjvw8dqBEK2OoQ4Ge09bU=",
+    "salt": "8Pmf++d1CPHdR2n/6ZO1pw=="
+   }
+  },
+  {
+   "nome": "Nycolas",
+   "chave": {
+    "iv": "YuVCBJbYTGO+bWUq",
+    "ct": "SAIe8qO5dmkGKBhI304hVv8hL0xr8tF82Fj3AtJ8OSxqxepKdoddQzoFvupoJhax1VQqRWm2hGfiT7z4hGTkNARgd+E=",
+    "salt": "vPz9/qYZGjIJyL2aqJsu7w=="
+   }
+  }
+ ],
+ "cofre": {
+  "iv": "GxaJR1nXHPFZN6z+",
+  "ct": "L6t406ulSJ4jqks29icskfwWIEGY6MU3k4vCb3WAt66cLcyQolqXvmmmlDS/Qbh1XMeopIP5nwbrBheo7woJbBcYxGLtRldvE7asK5NEqyIP6OR3OGYqFyIQT2c/ZapbfMrvXAzTVhyATNWH9rZ5kHlZp2YArWp5CQ=="
+ }
+}
