@@ -10,6 +10,7 @@ As edições são montadas no **montador** (`montador.html`), que publica sozinh
 | `index.html` | O boletim. Mostra a edição atual. |
 | `montador.html` + `montador.js` | O montador (CMS) para criar, validar e publicar as edições. |
 | `dados.json` | Todas as edições publicadas. **Gerado pelo montador — não edite à mão.** |
+| `acesso.json` | Usuários da equipe e o token criptografado. Criado pelo montador ao salvar a equipe. |
 | `boletim.js` / `boletim.css` | Renderizador e estilos. A página e a prévia do montador usam os mesmos. |
 | `assets/fonts/` | Fonte Unimed Sans. |
 | `assets/img/` | Capa, marca Unimed Uberlândia 55 anos, marca do Grupo e registro ANS. |
@@ -58,7 +59,23 @@ Regras da automação:
 2. Abra o montador (`/montador.html`) e clique em **GitHub** no topo.
 3. Usuário (`informativoudi`), repositório (`boletiminterno`) e branch (`main`) já vêm preenchidos. Cole o token, clique em **Testar conexão** e depois em **Salvar**.
 
-O token fica guardado só no navegador de quem configurou. Cada pessoa da equipe configura o seu.
+O token fica guardado só no navegador do administrador.
+
+## Equipe (usuário e senha)
+
+Quem usa o montador entra só com usuário e senha, sem precisar do token, como no montador do Informativo.
+
+1. O administrador conecta o GitHub com o token (passo anterior) e clica em **Gerenciar equipe** (ou **Mais › Equipe**).
+2. Adiciona cada pessoa com usuário e senha (mínimo 10 caracteres) e clica em **Salvar equipe**.
+3. Em cerca de um minuto, a pessoa abre o montador, entra com o usuário e a senha e já pode publicar.
+
+Como funciona: o token fica no arquivo `acesso.json`, **criptografado** com uma chave da equipe. Cada senha destrava essa chave; sem uma senha válida, o arquivo não serve para nada.
+
+- **Trocar a senha de alguém:** adicione de novo com o mesmo usuário e salve.
+- **Remover alguém:** clique em Remover e salve.
+- **Trocou o token?** Abra a equipe e clique em **Salvar equipe** para guardar o token novo.
+- Se o navegador do administrador perder a chave da equipe, entre com um usuário da equipe para mexer nela, ou use **Recomeçar equipe** (todas as senhas precisam ser cadastradas de novo).
+- Fora do GitHub Pages (no computador ou na prévia do projeto) o montador abre sem login, só para testes.
 
 ## Colocar no Framer
 

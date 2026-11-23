@@ -84,7 +84,7 @@ a{color:var(--verde)}
 .dica{font-size:12px;color:#736d61;margin-top:6px;line-height:1.5}
 .linha{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .linha3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-input[type=text],input[type=url],input[type=month],select,textarea{width:100%;height:38px;padding:0 12px;border:1.5px solid var(--borda);border-radius:9px;background:#fff;outline:none;transition:border-color .15s}
+input[type=text],input[type=url],input[type=month],input[type=password],select,textarea{width:100%;height:38px;padding:0 12px;border:1.5px solid var(--borda);border-radius:9px;background:#fff;outline:none;transition:border-color .15s}
 textarea{height:auto;min-height:90px;padding:10px 12px;resize:vertical;line-height:1.5}
 input:focus,select:focus,textarea:focus{border-color:var(--verde)}
 .seg{display:flex;background:#f2efe9;border-radius:10px;padding:3px;gap:3px;flex-wrap:wrap}
@@ -153,6 +153,15 @@ mark.r-verde{background:#d6efe2}mark.r-lima{background:#e6f2bf}mark.r-laranja{ba
 .modal p{color:var(--suave);line-height:1.55;font-size:13.5px}
 .modal pre{background:#f4f2ec;border-radius:10px;padding:12px;font-size:11.5px;overflow:auto;white-space:pre-wrap;word-break:break-all;max-height:200px;margin-top:8px}
 .modal-acoes{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}
+.login-fundo{position:fixed;inset:0;z-index:100;background:#cde3bb;display:flex;align-items:center;justify-content:center;padding:20px}
+.login{position:relative;background:#fff;border-radius:22px;width:min(400px,100%);padding:34px 30px 24px;box-shadow:0 30px 70px rgba(0,60,40,.18)}
+.login-folha{width:46px;height:46px;background:var(--lima);border-radius:100% 0 0 0;margin-bottom:16px}
+.login h1{font-size:22px;color:var(--petroleo);font-weight:800}
+.login>p{color:var(--suave);font-size:13px;margin:2px 0 18px}
+.login label:not(.check){display:block;font-size:10.5px;font-weight:800;color:var(--rotulo);letter-spacing:.09em;text-transform:uppercase;margin:12px 0 6px}
+.login input[type=text],.login input[type=password]{height:42px}
+.login-erro{min-height:18px;margin-top:10px;text-align:center;color:#c2410c;font-weight:700;font-size:13px}
+.login-admin{display:block;margin:8px auto 0;border:0;background:none;color:#736d61;font-size:12px;font-weight:700;text-decoration:underline}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--petroleo);color:#fff;padding:12px 18px;border-radius:12px;font-weight:600;font-size:13.5px;z-index:90;box-shadow:0 12px 30px rgba(0,0,0,.25);max-width:min(560px,92vw);text-align:center}
 .alerta{padding:10px 12px;border-radius:10px;background:#fff3e7;color:#8a3d05;font-size:12.5px;line-height:1.5;margin-top:10px}
 
@@ -174,6 +183,7 @@ mark.r-verde{background:#d6efe2}mark.r-lima{background:#e6f2bf}mark.r-laranja{ba
       <div class="menu-wrap">
         <button type="button" class="tb lima" data-a="menu" aria-expanded="false" aria-haspopup="true" id="btn-mais">Mais ▾</button>
         <div class="dropdown" id="menu-mais" role="menu">
+          <button type="button" role="menuitem" data-a="equipe">Equipe (usuários e senhas)</button>
           <button type="button" role="menuitem" data-a="framer">Código para o Framer</button>
           <button type="button" role="menuitem" data-a="legados">Edições antigas (Framer)</button>
           <hr>

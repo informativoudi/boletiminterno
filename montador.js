@@ -6,10 +6,39 @@
   var B = window.Boletim;
   var GH_KEY = 'boletim-montador-github';
   var REPO_PADRAO = { owner: 'informativoudi', repo: 'boletiminterno', branch: 'main', pasta: '' };
+  var SESS_KEY = 'boletim-montador-sessao';
+  var EQUIPE_K_KEY = 'boletim-montador-equipe-k';
+  // Fora do GitHub Pages (aqui no projeto ou no computador) o montador abre livre, sem login.
+  var MODO_TESTE = !/github\.io$/i.test(location.hostname || '');
+
+  // Criptografia no navegador (Web Crypto). A chave da equipe (K) fica guardada uma vez
+  // por usuário, travada com a senha dele. K abre o cofre com o token do GitHub.
+  var CR = {
+    b64: function (buf) { var b = new Uint8Array(buf), s = ''; for (var i = 0; i < b.length; i += 8192) s += String.fromCharCode.apply(null, b.subarray(i, i + 8192)); return btoa(s); },
+    unb64: function (s) { var bin = atob(s), u = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; },
+    deriva: function (senha, salt) {
+      return crypto.subtle.importKey('raw', new TextEncoder().encode(senha), 'PBKDF2', false, ['deriveKey']).then(function (base) {
+        return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: salt, iterations: 250000, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+      });
+    },
+    cifra: function (key, obj) {
+      var iv = crypto.getRandomValues(new Uint8Array(12));
+      return crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, key, new TextEncoder().encode(JSON.stringify(obj))).then(function (ct) { return { iv: CR.b64(iv), ct: CR.b64(ct) }; });
+    },
+    decifra: function (key, o) {
+      return crypto.subtle.decrypt({ name: 'AES-GCM', iv: CR.unb64(o.iv) }, key, CR.unb64(o.ct)).then(function (buf) { return JSON.parse(new TextDecoder().decode(new Uint8Array(buf))); });
+    },
+    comSenha: function (senha, obj) { var salt = crypto.getRandomValues(new Uint8Array(16)); return CR.deriva(senha, salt).then(function (k) { return CR.cifra(k, obj); }).then(function (r) { r.salt = CR.b64(salt); return r; }); },
+    abreSenha: function (senha, o) { return CR.deriva(senha, CR.unb64(o.salt)).then(function (k) { return CR.decifra(k, o); }); },
+    chaveK: function (k) { return crypto.subtle.importKey('raw', CR.unb64(k), 'AES-GCM', false, ['encrypt', 'decrypt']); },
+    comK: function (k, obj) { return CR.chaveK(k).then(function (c) { return CR.cifra(c, obj); }); },
+    abreK: function (k, o) { return CR.chaveK(k).then(function (c) { return CR.decifra(c, o); }); },
+    novaK: function () { return CR.b64(crypto.getRandomValues(new Uint8Array(32))); }
+  };
   var ENVIADAS_KEY = 'boletim-montador-imagens';
   var MAX_MIDIAS = 10, MAX_PESSOAS = 12;
 
-  var S = { dados: null, selId: null, abertos: {}, gh: {}, previa: true, prevModo: 'desktop', rolarPara: null };
+  var S = { dados: null, selId: null, abertos: {}, gh: {}, previa: true, prevModo: 'desktop', rolarPara: null, sessao: null };
 
   // ---------- Utilidades ----------
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -535,6 +564,7 @@
       case 'menu':
         var m = $('#menu-mais'); var ab = !m.classList.contains('aberto'); m.classList.toggle('aberto', ab); btn.setAttribute('aria-expanded', ab); return;
       case 'github': return modalGithub();
+      case 'equipe': return modalEquipe();
       case 'framer': return modalFramer();
       case 'legados': return modalLegados();
       case 'exportar': return baixar('backup-boletim-' + new Date().toISOString().slice(0, 10) + '.json', JSON.stringify(S.dados, null, 1));
@@ -741,7 +771,7 @@
       }, Promise.resolve()).then(function () {
         try { localStorage.setItem(ENVIADAS_KEY, JSON.stringify(enviadas)); } catch (e) { /* noop */ }
         walk(d, function (v) { return mapa[v] || v; });
-        return putArquivo('dados.json', b64utf8(JSON.stringify(d, null, 1)), 'Boletim: atualização pelo montador');
+        return putArquivo('dados.json', b64utf8(JSON.stringify(d, null, 1)), 'Boletim: atualização pelo montador' + (S.sessao ? ' · ' + S.sessao.nome : ''));
       });
     }).then(function (r) {
       publicando = false;
@@ -779,12 +809,15 @@
     modal('<h3>Publicar direto no GitHub</h3><p>O montador envia o <b>dados.json</b> (e as imagens enviadas) para o repositório <b>informativoudi/boletiminterno</b>. O site atualiza sozinho. Só falta colar o token.</p>' +
       '<div class="linha"><div class="campo"><label for="g1">Usuário ou organização</label><input type="text" id="g1" value="' + esc(g.owner || '') + '" placeholder="ex.: informativoudi"></div><div class="campo"><label for="g2">Repositório</label><input type="text" id="g2" value="' + esc(g.repo || '') + '" placeholder="ex.: boletim-comunicacao-interna"></div></div>' +
       '<div class="linha"><div class="campo"><label for="g3">Branch</label><input type="text" id="g3" value="' + esc(g.branch || 'main') + '"></div><div class="campo"><label for="g4">Pasta no repositório</label><input type="text" id="g4" value="' + esc(g.pasta || '') + '" placeholder="vazio = raiz"></div></div>' +
-      '<div class="campo"><label for="g5">Token de acesso</label><input type="password" id="g5" value="' + esc(g.token || '') + '" placeholder="github_pat_…" autocomplete="off"><div class="dica">Fica guardado só neste navegador. Use um <b>fine-grained token</b> só deste repositório, com permissão <i>Contents: Read and write</i>.</div></div>' +
+      (S.sessao ? '<input type="hidden" id="g5" value="' + esc(g.token || '') + '"><div class="alerta" style="background:#eef6f0;color:#0b5a3b">Você entrou como <b>' + esc(S.sessao.nome) + '</b>: o token da equipe já está em uso.</div><div style="display:none">' : '') + '<div class="campo"><label for="g5">Token de acesso</label><input type="password" id="g5" value="' + esc(g.token || '') + '" placeholder="github_pat_…" autocomplete="off"><div class="dica">Fica guardado só neste navegador. Use um <b>fine-grained token</b> só deste repositório, com permissão <i>Contents: Read and write</i>.</div></div>' +
+      (S.sessao ? '</div>' : '') +
       '<div id="g-status" class="dica" role="status"></div>' +
+      '<div class="alerta" style="background:#eef6f0;color:#0b5a3b"><b>Equipe:</b> depois de testar o token, cadastre quem vai usar o montador com usuário e senha. <button type="button" class="mini" style="height:30px;margin-left:6px" data-equipe>Gerenciar equipe</button></div>' +
       '<div class="modal-acoes"><button type="button" class="bt cinza" data-fechar>Fechar</button><button type="button" class="bt cinza" data-testar>Testar conexão</button><button type="button" class="bt verde" data-salvar>Salvar</button></div>', function (m, fechar) {
       var ler = function () { return { owner: m.querySelector('#g1').value.trim(), repo: m.querySelector('#g2').value.trim(), branch: m.querySelector('#g3').value.trim() || 'main', pasta: m.querySelector('#g4').value.trim(), token: m.querySelector('#g5').value.trim() }; };
-      var guarda = function () { S.gh = ler(); try { localStorage.setItem(GH_KEY, JSON.stringify(S.gh)); } catch (e) { /* noop */ } atualizarGhBotao(); };
+      var guarda = function () { S.gh = ler(); if (!S.sessao) { try { localStorage.setItem(GH_KEY, JSON.stringify(S.gh)); } catch (e) { /* noop */ } } atualizarGhBotao(); };
       m.querySelector('[data-salvar]').addEventListener('click', function () { guarda(); fechar(); toast(ghPronto() ? 'GitHub configurado.' : 'Configuração salva (incompleta).'); });
+      m.querySelector('[data-equipe]').addEventListener('click', function () { guarda(); fechar(); modalEquipe(); });
       m.querySelector('[data-testar]').addEventListener('click', function () {
         guarda(); var st = m.querySelector('#g-status');
         if (!ghPronto()) { st.textContent = 'Preencha usuário, repositório e token.'; return; }
@@ -793,6 +826,148 @@
           if (r.ok) st.textContent = r.corpo.permissions && r.corpo.permissions.push ? '✓ Conectado a ' + r.corpo.full_name + ' com permissão de escrita.' : 'Conectado, mas o token não tem permissão de escrita.';
           else st.textContent = r.status === 401 ? 'Token inválido ou expirado.' : r.status === 404 ? 'Repositório não encontrado — confira o nome e as permissões do token.' : 'Erro ' + r.status + '.';
         }).catch(function () { st.textContent = 'Não consegui falar com o GitHub a partir desta página.'; });
+      });
+    });
+  }
+
+  // ---------- Equipe e login ----------
+  function lerAcessoPublico() {
+    var g = S.gh;
+    var raw = 'https://raw.githubusercontent.com/' + g.owner + '/' + g.repo + '/' + (g.branch || 'main') + '/' + caminho('acesso.json') + '?t=' + Date.now();
+    return fetch(raw, { cache: 'no-store' }).then(function (r) { if (r.ok) return r.json(); throw new Error('raw'); })
+      .catch(function () { return fetch('acesso.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }); });
+  }
+  function kAtual() {
+    if (S.sessao && S.sessao.k) return S.sessao.k;
+    try { return localStorage.getItem(EQUIPE_K_KEY) || ''; } catch (e) { return ''; }
+  }
+  function guardarSessao(s, lembrar) {
+    var st = lembrar === false ? sessionStorage : localStorage;
+    try { st.setItem(SESS_KEY, JSON.stringify(s)); } catch (e) { /* cota */ }
+  }
+  function lerSessao() {
+    try { return JSON.parse(sessionStorage.getItem(SESS_KEY) || localStorage.getItem(SESS_KEY) || 'null'); } catch (e) { return null; }
+  }
+  function sair() {
+    try { sessionStorage.removeItem(SESS_KEY); localStorage.removeItem(SESS_KEY); } catch (e) { /* noop */ }
+    location.reload();
+  }
+  function atualizarSessaoTopo() {
+    var b = $('#btn-sair');
+    if (!S.sessao) { if (b) b.remove(); return; }
+    if (!b) {
+      b = document.createElement('button'); b.type = 'button'; b.id = 'btn-sair'; b.className = 'tb';
+      b.addEventListener('click', sair);
+      $('#btn-gh').parentNode.insertBefore(b, $('#btn-gh'));
+    }
+    b.textContent = S.sessao.nome + ' · Sair';
+  }
+
+  function telaLogin() {
+    var f = document.createElement('div');
+    f.className = 'login-fundo';
+    f.innerHTML = '<form class="login" autocomplete="on"><div class="login-folha" aria-hidden="true"></div>' +
+      '<h1>Montador do Boletim</h1><p>Comunicação Interna · Grupo Unimed Uberlândia</p>' +
+      '<label for="lg-u">Usuário</label><input type="text" id="lg-u" autocomplete="username" required>' +
+      '<label for="lg-s">Senha</label><input type="password" id="lg-s" autocomplete="current-password" required>' +
+      '<label class="check" style="margin-top:12px"><input type="checkbox" id="lg-l" checked> Manter conectado neste computador</label>' +
+      '<button type="submit" class="bt verde" style="width:100%;height:44px;justify-content:center;margin-top:16px">Entrar</button>' +
+      '<div class="login-erro" role="alert"></div>' +
+      '<button type="button" class="login-admin">Administrador: configurar com token</button></form>';
+    document.body.appendChild(f);
+    var erro = f.querySelector('.login-erro');
+    f.querySelector('#lg-u').focus();
+    f.querySelector('.login-admin').addEventListener('click', function () { f.remove(); modalGithub(); });
+    f.querySelector('form').addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var nome = f.querySelector('#lg-u').value.trim(), senha = f.querySelector('#lg-s').value;
+      var btn = f.querySelector('[type=submit]'); btn.disabled = true; btn.textContent = 'Entrando…'; erro.textContent = '';
+      var falha = function (m) { btn.disabled = false; btn.textContent = 'Entrar'; erro.textContent = m; };
+      lerAcessoPublico().then(function (acesso) {
+        if (!acesso || !acesso.cofre) { falha('A equipe ainda não foi configurada pelo administrador.'); return; }
+        var u = (acesso.usuarios || []).filter(function (x) { return x.nome.toLowerCase() === nome.toLowerCase(); })[0];
+        if (!u) { falha('Usuário ou senha incorretos.'); return; }
+        return CR.abreSenha(senha, u.chave).then(function (o) {
+          return CR.abreK(o.k, acesso.cofre).then(function (cofre) {
+            var sess = { nome: u.nome, k: o.k, token: cofre.token };
+            guardarSessao(sess, f.querySelector('#lg-l').checked);
+            S.sessao = { nome: sess.nome, k: sess.k };
+            S.gh = Object.assign({}, REPO_PADRAO, { token: sess.token });
+            f.remove(); atualizarGhBotao(); atualizarSessaoTopo();
+            toast('Olá, ' + sess.nome + '!');
+            buscarSite(true).catch(function () { /* sem dados */ });
+          });
+        }).catch(function () { falha('Usuário ou senha incorretos.'); });
+      }).catch(function () { falha('Não consegui falar com o GitHub a partir desta página. Seu usuário e senha não foram verificados.'); });
+    });
+  }
+
+  function lerEquipe() {
+    var ramo = S.gh.branch || 'main';
+    return gh('GET', '/contents/' + caminho('acesso.json') + '?ref=' + encodeURIComponent(ramo) + '&t=' + Date.now()).then(function (r) {
+      if (r.status === 404) return { acesso: { v: 1, usuarios: [], cofre: null }, sha: undefined };
+      if (!r.ok) throw new Error('erro ' + r.status);
+      var bin = atob(r.corpo.content.replace(/\n/g, '')), bytes = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return { acesso: JSON.parse(new TextDecoder().decode(bytes)), sha: r.corpo.sha };
+    });
+  }
+
+  function modalEquipe() {
+    if (!ghPronto()) { toast('Configure e teste o token do GitHub primeiro.'); modalGithub(); return; }
+    var eq = null, sha, k = kAtual(), alterado = false;
+    modal('<h3>Equipe do montador</h3><p>Quem estiver aqui entra no montador só com usuário e senha, sem ver o token. O token fica guardado criptografado no repositório.</p>' +
+      '<div id="eq-lista" style="margin-top:14px"><p>Carregando…</p></div>' +
+      '<div class="campo"><label>Adicionar pessoa</label><div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px"><input type="text" id="eq-n" placeholder="Usuário (ex.: Camila)" autocomplete="off"><input type="password" id="eq-s" placeholder="Senha (mín. 10)" autocomplete="new-password"><button type="button" class="mini" data-add>Adicionar</button></div>' +
+      '<div class="dica">Para trocar a senha de alguém, adicione de novo com o mesmo usuário.</div></div>' +
+      '<div id="eq-st" class="dica" role="status"></div>' +
+      '<div class="modal-acoes"><button type="button" class="bt cinza" data-fechar>Fechar</button><button type="button" class="bt verde" data-salvar>Salvar equipe</button></div>', function (m, fechar) {
+      var st = m.querySelector('#eq-st');
+      var desenha = function () {
+        var us = (eq && eq.usuarios) || [];
+        m.querySelector('#eq-lista').innerHTML = us.length ? us.map(function (u, i) {
+          return '<div class="flex" style="justify-content:space-between;padding:9px 12px;background:#f7f5f0;border-radius:9px;margin-top:6px"><b style="font-size:13.5px">' + esc(u.nome) + '</b><button type="button" class="mini" style="height:30px;color:#c2410c" data-rem="' + i + '">Remover</button></div>';
+        }).join('') : '<p>Nenhuma pessoa ainda.</p>';
+        if (eq && eq.cofre && us.length && !k) st.innerHTML = '<span style="color:#8a3d05">Este navegador não tem a chave da equipe. Entre com um usuário da equipe para mexer nela, ou <button type="button" class="mini" style="height:28px" data-reset>Recomeçar equipe</button> (as senhas atuais deixam de valer).</span>';
+      };
+      lerEquipe().then(function (r) { eq = r.acesso; sha = r.sha; desenha(); }).catch(function (e) { st.textContent = 'Não consegui ler a equipe (' + e.message + ').'; });
+      m.addEventListener('click', function (ev) {
+        var rem = ev.target.closest('[data-rem]');
+        if (rem) { eq.usuarios.splice(+rem.dataset.rem, 1); alterado = true; desenha(); st.textContent = 'Removido. Clique em Salvar equipe.'; return; }
+        if (ev.target.closest('[data-reset]')) {
+          k = CR.novaK(); try { localStorage.setItem(EQUIPE_K_KEY, k); } catch (e) { /* noop */ }
+          eq.usuarios = []; eq.cofre = null; alterado = true; desenha(); st.textContent = 'Equipe zerada. Adicione as pessoas e salve.'; return;
+        }
+        if (ev.target.closest('[data-add]')) {
+          var nome = m.querySelector('#eq-n').value.trim(), senha = m.querySelector('#eq-s').value;
+          if (!eq) return;
+          if (!nome) { st.textContent = 'Informe o usuário.'; return; }
+          if (senha.length < 10) { st.textContent = 'Use uma senha com pelo menos 10 caracteres.'; return; }
+          if (!k) {
+            if (eq.cofre && eq.usuarios.length) { st.textContent = 'Entre com um usuário da equipe ou recomece a equipe.'; return; }
+            k = CR.novaK(); try { localStorage.setItem(EQUIPE_K_KEY, k); } catch (e) { /* noop */ }
+          }
+          CR.comSenha(senha, { k: k }).then(function (chave) {
+            eq.usuarios = (eq.usuarios || []).filter(function (u) { return u.nome.toLowerCase() !== nome.toLowerCase(); }).concat([{ nome: nome, chave: chave }]);
+            m.querySelector('#eq-n').value = ''; m.querySelector('#eq-s').value = '';
+            alterado = true; desenha(); st.textContent = nome + ' adicionado(a). Clique em Salvar equipe.';
+          });
+        }
+        if (ev.target.closest('[data-salvar]')) {
+          if (!eq || !eq.usuarios.length) { st.textContent = 'Adicione pelo menos uma pessoa.'; return; }
+          if (!k) { st.textContent = 'Falta a chave da equipe.'; return; }
+          st.textContent = 'Salvando…';
+          CR.comK(k, { token: S.gh.token }).then(function (cofre) {
+            var acesso = { v: 1, usuarios: eq.usuarios, cofre: cofre };
+            var corpo = { message: 'Montador do Boletim: equipe atualizada' + (S.sessao ? ' · ' + S.sessao.nome : ''), content: b64utf8(JSON.stringify(acesso, null, 1)), branch: S.gh.branch || 'main' };
+            if (sha) corpo.sha = sha;
+            return gh('PUT', '/contents/' + caminho('acesso.json'), corpo);
+          }).then(function (r) {
+            if (!r.ok) { st.textContent = 'Erro ' + r.status + ' ao salvar.'; return; }
+            sha = r.corpo.content && r.corpo.content.sha; alterado = false;
+            st.textContent = '✓ Equipe salva. Em cerca de um minuto, quem estiver na lista já consegue entrar.';
+          }).catch(function () { st.textContent = 'Não consegui falar com o GitHub.'; });
+        }
       });
     });
   }
@@ -862,6 +1037,10 @@
     S.gh = Object.assign({}, REPO_PADRAO, salvo);
     if (!S.gh.owner) S.gh.owner = REPO_PADRAO.owner;
     if (!S.gh.repo) S.gh.repo = REPO_PADRAO.repo;
+    var sess = lerSessao();
+    if (sess && sess.token) { S.sessao = { nome: sess.nome, k: sess.k }; S.gh = Object.assign({}, REPO_PADRAO, { token: sess.token }); }
+    atualizarSessaoTopo();
+    if (!MODO_TESTE && !S.gh.token) telaLogin();
     ligarEditor();
     var vazio = function () { S.dados = { v: 1, legados: [], edicoes: [] }; };
     abrirDB().then(lerLocal).then(function (d) {
